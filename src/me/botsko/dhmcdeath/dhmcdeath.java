@@ -17,7 +17,7 @@ package me.botsko.dhmcdeath;
  * - Use generic mob messages or add them for specific mob types
  * - Custom colors allowed in messages.
  * - Disable message for specific events, i.e. show mob death messages but ignore PVP
- * - Limit messages by world
+ * - Optionally limit messages by world
  * - Optionally limit the message to players within a range of the death
  * - Shows owners of tamed wolves
  * - Supports all 1.1 Minecraft mobs
@@ -29,6 +29,13 @@ package me.botsko.dhmcdeath;
  * - Optional range limit
  * - Tamed wolf owners are listed too
  * - Per-death-type event disabling
+ * Version 0.1.1
+ * - Fixed message log left inside a loop
+ * - Fixed weapon of "air" reported when using hands
+ * Version 0.1.2
+ * - Minor change to character in a message
+ * Version 0.1.3
+ * - Corrected string comparison for "air"
  * 
  * 
  * TODO
@@ -135,7 +142,7 @@ public class dhmcdeath extends JavaPlugin implements Listener  {
 		fall.add("&3%d &cfinally experienced terminal velocity.");
 		fall.add("&3%d &cwent skydiving, forgot the parachute.");
 		fall.add("&cWe'll hold a moment of silence while we laugh at your falling death, &3%d.");
-		fall.add("&cAttempting a high-wire stunt yet again, $3%d &cslipped, and died.");
+		fall.add("&cAttempting a high-wire stunt yet again, &3%d &cslipped, and died.");
 		fall.add("&cSomehow tree tops are immune to gravity. &3%d &cis not.");
 		fall.add("&cNice going &3%d, &cyou've fallen. You're in a group that includes sand, and gravel - the losers of three.");
 		fall.add("&cWe're here today to mourn the loss of &3%d&c. He is survived by his Nyan Cat and Creeper statues.");
@@ -143,7 +150,7 @@ public class dhmcdeath extends JavaPlugin implements Listener  {
 		fall.add("&cOh man that was hard fall &3%d&c! You ok? &3%d&c? How many fingers dude? Um, dude? Oh sh...");
 		fall.add("&3%d &chad a whoopsie-daisy!");
 		fall.add("&3%d &cwas testing gravity. Yup, still works.");
-		fall.add("Although &3%d's &cbody lies on the ground somewhere, the question stands. Will it blend?");
+		fall.add("&cAlthough &3%d's &cbody lies on the ground somewhere, the question stands. Will it blend?");
 		this.getConfig().set("messages.fall.messages", this.getConfig().get("messages.fall.messages", fall ) );
 		
 		List<String> fire=new ArrayList<String>();
@@ -194,7 +201,7 @@ public class dhmcdeath extends JavaPlugin implements Listener  {
 		
 			List<String> creeper=new ArrayList<String>();
 			creeper.add("&3%d &cwas creeper bombed.");
-			creeper.add("&3%d &chugged a creepert.");
+			creeper.add("&3%d &chugged a creeper.");
 			creeper.add("&cSorry you died &3%d&c, a creeper's gonna creep!");
 			creeper.add("&3%d &cwas testing a new creeper-proof suit. It didn't work.");
 			creeper.add("&3%d &cwas not involved in any explosion, nor are we able to confirm the existence of the \"creeper\". Move along.");
@@ -332,21 +339,23 @@ public class dhmcdeath extends JavaPlugin implements Listener  {
 	            final_msg = colorize(final_msg);
 	            
 	            // If we allow all worlds, get all online players
-//	            Player[] players = null;
-//	            if( getConfig().getBoolean("allow_cross_world") ){
-//	            	players = getServer().getOnlinePlayers();
-//	            } else {
-//	            	players = (Player[]) p.getWorld().getPlayers().toArray();
-//	            }
+				Player[] players = null;
+				if( getConfig().getBoolean("allow_cross_world") ){
+					players = getServer().getOnlinePlayers();
+				} else {
+					players = p.getWorld().getPlayers().toArray(new Player[0]);
+				}
 	            
 	            // Iterate all players within the world
-	            for (Player player : p.getWorld().getPlayers()) {
+	            for (Player player : players) {
 	            	if(debug) log.info("[dhmcDeath]: Distance Was: " + player.getLocation().distance( p.getLocation() ) );
 	            	// Only send message if player is within distance
 	            	if( !getConfig().getBoolean("use_hear_distance") || player.getLocation().distance( p.getLocation() ) <= getConfig().getInt("messages.hear_distance") ) {
 		            	player.sendMessage( final_msg );
+		            	if(debug) log.info("[dhmcDeath]: Messaging Player: " + player.getName());
 	            	}
 	    		}
+	            log.info("[dhmcDeath]: " + final_msg);
             } else {
             	if(debug) log.info("[dhmcDeath]: Messages are disabled for this cause: " + cause);
             }
@@ -550,6 +559,9 @@ public class dhmcdeath extends JavaPlugin implements Listener  {
         	ItemStack weapon = p.getKiller().getItemInHand();
         	death_weapon = weapon.getType().toString().toLowerCase();
         	death_weapon = death_weapon.replaceAll("_", " ");
+        	if(death_weapon.equalsIgnoreCase("air")){
+        		death_weapon = " hands";
+        	}
         }
         if(debug) log.info("[dhmcDeath]: Weapon: " + death_weapon );
         

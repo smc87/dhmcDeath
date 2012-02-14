@@ -3,6 +3,5 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="/Users/botskonet/Documents/workspace/bukkit-1.1-R1-20120124.205229-48.jar"/>
-	<classpathentry kind="lib" path="/Users/botskonet/Documents/workspace/Vault.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
