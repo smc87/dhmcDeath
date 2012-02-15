@@ -36,6 +36,10 @@ package me.botsko.dhmcdeath;
  * - Minor change to character in a message
  * Version 0.1.3
  * - Corrected string comparison for "air"
+ * Version 0.1.4
+ * - Adding config reload command, with basic permission support
+ * - Moved debug option to config
+ * - Added central logging/debug methods
  * 
  * 
  * TODO
@@ -50,7 +54,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.logging.Logger;
 
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Blaze;
@@ -87,7 +93,6 @@ public class dhmcdeath extends JavaPlugin implements Listener  {
 	
 	Logger log = Logger.getLogger("Minecraft");
 	protected FileConfiguration config;
-	final private boolean debug = true;
 	
 	
 	/**
@@ -96,6 +101,9 @@ public class dhmcdeath extends JavaPlugin implements Listener  {
 	private void handleConfig(){
 		
 		config = getConfig();
+		
+		// other configs
+		this.getConfig().set("debug", this.getConfig().get("debug", false) );
 		
 		// Base config
 		this.getConfig().set("messages.allow_cross_world", this.getConfig().get("messages.allow_cross_world", false) );
@@ -267,9 +275,11 @@ public class dhmcdeath extends JavaPlugin implements Listener  {
      */
 	public void onEnable(){
 		
-		log.info("[dhmcDeath]: Initializing.");
+		this.log("[dhmcDeath]: Initializing.");
 		handleConfig();
 		getServer().getPluginManager().registerEvents(this, this);
+		
+		getCommand("dhmcdeath").setExecutor( (CommandExecutor) new DhmcdeathCommandExecutor(this) );
 		
 	}
 	
@@ -348,16 +358,16 @@ public class dhmcdeath extends JavaPlugin implements Listener  {
 	            
 	            // Iterate all players within the world
 	            for (Player player : players) {
-	            	if(debug) log.info("[dhmcDeath]: Distance Was: " + player.getLocation().distance( p.getLocation() ) );
+	            	debug("[dhmcDeath]: Distance Was: " + player.getLocation().distance( p.getLocation() ) );
 	            	// Only send message if player is within distance
 	            	if( !getConfig().getBoolean("use_hear_distance") || player.getLocation().distance( p.getLocation() ) <= getConfig().getInt("messages.hear_distance") ) {
 		            	player.sendMessage( final_msg );
-		            	if(debug) log.info("[dhmcDeath]: Messaging Player: " + player.getName());
+		            	debug("[dhmcDeath]: Messaging Player: " + player.getName());
 	            	}
 	    		}
-	            log.info("[dhmcDeath]: " + final_msg);
+	            this.log("[dhmcDeath]: " + final_msg);
             } else {
-            	if(debug) log.info("[dhmcDeath]: Messages are disabled for this cause: " + cause);
+            	debug("[dhmcDeath]: Messages are disabled for this cause: " + cause);
             }
 		}
 	}
@@ -391,7 +401,7 @@ public class dhmcdeath extends JavaPlugin implements Listener  {
 		
 		// Determine the root cause
         String cause = event.getEntity().getLastDamageCause().getCause().toString();
-        if(debug) log.info("[dhmcDeath]: Raw Cause: " + cause);
+        debug("[dhmcDeath]: Raw Cause: " + cause);
         
         // Detect additional suicide. For example, when you potion
         // yourself with instant damage it doesn't show as suicide.
@@ -431,7 +441,7 @@ public class dhmcdeath extends JavaPlugin implements Listener  {
         	cause = "potion";
         }
         
-        if(debug) log.info("[dhmcDeath]: Parsed Cause: " + cause);
+        debug("[dhmcDeath]: Parsed Cause: " + cause);
         
         return cause;
 		
@@ -455,7 +465,7 @@ public class dhmcdeath extends JavaPlugin implements Listener  {
             if(cause == "mob"){
             	
             	Entity killer = ((EntityDamageByEntityEvent)event.getEntity().getLastDamageCause()).getDamager();
-            	if(debug) log.info("[dhmcDeath]: Entity Was: " + killer);
+            	debug("[dhmcDeath]: Entity Was: " + killer);
             	
             	if (killer instanceof Blaze){
             		attacker = "blaze";
@@ -514,7 +524,7 @@ public class dhmcdeath extends JavaPlugin implements Listener  {
             	}
             }
         }
-        if(debug) log.info("[dhmcDeath]: Attacker: " + attacker);
+        debug("[dhmcDeath]: Attacker: " + attacker);
         
         return attacker;
         
@@ -541,7 +551,7 @@ public class dhmcdeath extends JavaPlugin implements Listener  {
                 }
             }
     	}
-		if(debug) log.info("[dhmcDeath]: Wolf Owner: " + owner);
+		debug("[dhmcDeath]: Wolf Owner: " + owner);
 		return owner;
 	}
 	
@@ -563,7 +573,7 @@ public class dhmcdeath extends JavaPlugin implements Listener  {
         		death_weapon = " hands";
         	}
         }
-        if(debug) log.info("[dhmcDeath]: Weapon: " + death_weapon );
+        debug("[dhmcDeath]: Weapon: " + death_weapon );
         
         return death_weapon;
         
@@ -579,6 +589,46 @@ public class dhmcdeath extends JavaPlugin implements Listener  {
         String colorized = text.replaceAll("(&([a-f0-9A-F]))", "\u00A7$2");
         return colorized;
     }
+	
+	
+	/**
+	 * 
+	 * @param msg
+	 * @return
+	 */
+	public String playerMsg(String msg){
+		return ChatColor.GOLD + "[dhmcDeath]: " + ChatColor.WHITE + msg;
+	}
+	
+	
+	/**
+	 * 
+	 * @param msg
+	 * @return
+	 */
+	public String playerError(String msg){
+		return ChatColor.GOLD + "[dhmcDeath]: " + ChatColor.RED + msg;
+	}
+	
+	
+	/**
+	 * 
+	 * @param message
+	 */
+	public void log(String message){
+		log.info("[dhmcDeath]: " + message);
+	}
+	
+	
+	/**
+	 * 
+	 * @param message
+	 */
+	public void debug(String message){
+		if(this.getConfig().getBoolean("debug")){
+			this.log("[dhmcDeath]: " + message);
+		}
+	}
 
 
 	/**
@@ -586,6 +636,6 @@ public class dhmcdeath extends JavaPlugin implements Listener  {
 	 */
 	@Override
 	public void onDisable() {
-		log.info("[dhmcDeath]: Shutting down.");
+		this.log("[dhmcDeath]: Shutting down.");
 	}
 }
