@@ -55,12 +55,14 @@ package me.botsko.dhmcdeath;
  * 
  */
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Logger;
 
+import me.botsko.dhmcdeath.commands.DeathCommandExecutor;
+import me.botsko.dhmcdeath.commands.DhmcdeathCommandExecutor;
 import me.botsko.dhmcdeath.tp.Death;
-import me.botsko.dhmcdeath.tp.DeathCapture;
 
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -101,6 +103,7 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	
 	Logger log = Logger.getLogger("Minecraft");
 	protected FileConfiguration config;
+	protected HashMap<String,Death> deaths = new HashMap<String,Death>();
 	
 	
 	/**
@@ -110,18 +113,13 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 		
 		this.log("[dhmcDeath]: Initializing.");
 		
-//		File cfile = new File(getDataFolder(), "config.yml");
-//		if(!cfile.exists()){
-//			setDefaultConfig();
-//		}
 		// Load configuration, or install if new
 		config = DeathConfig.init( this );
 		
 		getServer().getPluginManager().registerEvents(this, this);
 		
-		this.getDataFolder();
-		
 		getCommand("dhmcdeath").setExecutor( (CommandExecutor) new DhmcdeathCommandExecutor(this) );
+		getCommand("death").setExecutor( (CommandExecutor) new DeathCommandExecutor(this) );
 
 	}
 	
@@ -185,17 +183,25 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	            	attacker = owner+"'s wolf";
 	            }
 	            final_msg = final_msg.replaceAll("%a", attacker);
-	            
 	            final_msg = final_msg.replaceAll("%i", getWeapon(p) );
 	            
 	            // Colorize
 	            final_msg = colorize(final_msg);
 	            
-	            
 	            // Store the death data
-	            DeathCapture dc = new DeathCapture(this, p, new Death( p.getLocation(), p, p.getWorld(), cause, attacker ));
-	            dc.write();
+	            if(this.deaths.containsKey(p.getName())){
+	            	this.deaths.remove(p.getName());
+	            }
 	            
+	            boolean allow_tp = true;
+	            if(!getConfig().getBoolean("allow_dethpoint_tp_on_pvp")){
+	            	if(cause.equals("pvp")){
+	            		allow_tp = false;
+	            	}
+	            }
+	            if(allow_tp){
+	            	deaths.put( p.getName(), new Death( p.getLocation(), p, p.getWorld(), cause, attacker ));
+	            }
 	            
 	            // Send the final message
 	            if( getConfig().getBoolean("allow_cross_world") && !getConfig().getBoolean("use_hear_distance") ){
@@ -221,6 +227,15 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
             	debug("Messages are disabled for this cause: " + cause);
             }
 		}
+	}
+	
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public HashMap<String,Death> getDeaths(){
+		return this.deaths;
 	}
 	
 	

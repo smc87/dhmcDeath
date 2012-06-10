@@ -5,3 +5,6 @@ commands:
    dhmcdeath:
       description: Administrative commands for dhmcDeath.
       usage: /dhmcdeath (reload)
+   death:
+      description: Return to your place of death
+      usage: /death

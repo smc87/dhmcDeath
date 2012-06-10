@@ -1,4 +1,6 @@
-package me.botsko.dhmcdeath;
+package me.botsko.dhmcdeath.commands;
+
+import me.botsko.dhmcdeath.DhmcDeath;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

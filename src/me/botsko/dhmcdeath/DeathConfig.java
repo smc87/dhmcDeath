@@ -22,6 +22,8 @@ public class DeathConfig {
 		// Base config
 		config.addDefault("messages.allow_cross_world", false );
 		config.addDefault("messages.hear_distance", 50 );
+		
+		config.addDefault("allow_dethpoint_tp_on_pvp", false );
 
 		// Set initial methods as enabled
 		config.addDefault("messages.custom.enabled", true );
