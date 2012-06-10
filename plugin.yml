@@ -1,6 +1,6 @@
 name: dhmcDeath
-main: me.botsko.dhmcdeath.dhmcdeath
-version: 0.1.4
+main: me.botsko.dhmcdeath.DhmcDeath
+version: 0.1.7
 commands:
    dhmcdeath:
       description: Administrative commands for dhmcDeath.

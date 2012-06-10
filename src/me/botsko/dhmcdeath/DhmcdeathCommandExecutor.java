@@ -8,14 +8,14 @@ import org.bukkit.plugin.IllegalPluginAccessException;
 
 public class DhmcdeathCommandExecutor implements CommandExecutor {
 	
-	private dhmcdeath plugin;
+	private DhmcDeath plugin;
 	
 	/**
 	 * 
 	 * @param plugin
 	 * @return 
 	 */
-	public DhmcdeathCommandExecutor(dhmcdeath plugin) {
+	public DhmcdeathCommandExecutor(DhmcDeath plugin) {
 		this.plugin = plugin;
 	}
 	
