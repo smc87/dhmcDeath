@@ -47,6 +47,12 @@ package me.botsko.dhmcdeath;
  * - Fixed issue with removed configuration options being re-added
  * - Removed use_hear_distance config, hear distance will be ignored if set to 0
  * - Thanks to napalm1 for testing the radius fix with me.
+ * Version 0.1.7
+ * - Added /death command that returns a player to their last death
+ * - Modified config system
+ * - Added config to disallow /death when died in pvp
+ * - Added config to disable logging deaths
+ * - Changed log to log the death info, not the message
  * 
  * TODO
  * - Allow players to ignore all death messages
@@ -199,8 +205,9 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	            		allow_tp = false;
 	            	}
 	            }
+	            Death death = new Death( p.getLocation(), p, p.getWorld(), cause, attacker );
 	            if(allow_tp){
-	            	deaths.put( p.getName(), new Death( p.getLocation(), p, p.getWorld(), cause, attacker ));
+	            	deaths.put( p.getName(), death );
 	            }
 	            
 	            // Send the final message
@@ -222,7 +229,9 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 		            	}
 		    		}
 	            }
-	            this.log("[dhmcDeath]: " + final_msg);
+	            if(getConfig().getBoolean("messages.log_deaths")){
+	            	this.log(death.getPlayer().getName() + " died from " + death.getCause() + " (killer: "+death.getAttacker()+") in " + death.getWorld().getName() + " at x:" + death.getLocation().getX() + " y:" + death.getLocation().getY() + " z:" + death.getLocation().getZ() );
+	            }
             } else {
             	debug("Messages are disabled for this cause: " + cause);
             }
@@ -417,7 +426,7 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
                 }
             }
     	}
-		debug("[dhmcDeath]: Wolf Owner: " + owner);
+		debug("Wolf Owner: " + owner);
 		return owner;
 	}
 	
@@ -439,7 +448,7 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
         		death_weapon = " hands";
         	}
         }
-        debug("[dhmcDeath]: Weapon: " + death_weapon );
+        debug("Weapon: " + death_weapon );
         
         return death_weapon;
         
@@ -482,7 +491,7 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	 * @param message
 	 */
 	public void log(String message){
-		log.info(message);
+		log.info("[dhmcDeath}]: "+message);
 	}
 	
 	
