@@ -491,7 +491,7 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	 * @param message
 	 */
 	public void log(String message){
-		log.info("[dhmcDeath}]: "+message);
+		log.info("[dhmcDeath]: "+message);
 	}
 	
 	
