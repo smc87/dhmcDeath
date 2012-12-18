@@ -39,8 +39,10 @@ public class DeathCommandExecutor implements CommandExecutor {
 		// Is a player issue this command?
     	if (sender instanceof Player) {
     		Player player = (Player) sender;
-			returnToDeathPoint( player );
-			return true;
+    		if(player.hasPermission("dhmcdeath.tp")){
+    			returnToDeathPoint( player );
+    			return true;
+    		}
     	}
 
 		return false; 
@@ -53,10 +55,10 @@ public class DeathCommandExecutor implements CommandExecutor {
 	 * @param player
 	 */
 	protected void returnToDeathPoint( Player player ){
-		plugin.log("Deaths: " + plugin.getDeaths().size());
 		if(plugin.getDeaths().containsKey(player.getName())){
 			Death d = plugin.getDeaths().get( player.getName() );
 			player.teleport( d.getLocation() );
+			plugin.getDeaths().remove( player.getName() );
 		} else {
 			player.sendMessage(plugin.playerError("No death location was saved."));
 		}

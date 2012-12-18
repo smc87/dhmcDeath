@@ -53,6 +53,8 @@ package me.botsko.dhmcdeath;
  * - Added config to disallow /death when died in pvp
  * - Added config to disable logging deaths
  * - Changed log to log the death info, not the message
+ * Version 0.1.8
+ * - Added permission node dhmcdeath.tp for using /death
  * 
  * TODO
  * - Allow players to ignore all death messages
@@ -117,7 +119,7 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
      */
 	public void onEnable(){
 		
-		this.log("[dhmcDeath]: Initializing.");
+		this.log("Initializing plugin. By Viveleroi, Darkhelmet Minecraft: s.dhmc.us");
 		
 		// Load configuration, or install if new
 		config = DeathConfig.init( this );
@@ -211,21 +213,25 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	            }
 	            
 	            // Send the final message
-	            if( getConfig().getBoolean("allow_cross_world") && !getConfig().getBoolean("use_hear_distance") ){
+	            if( getConfig().getBoolean("messages.allow_cross_world") ){
 		            for (Player player : getServer().getOnlinePlayers()) {
-			            player.sendMessage( final_msg );
-			            debug("Messaging Player: " + player.getName());
+		            	if(player.hasPermission("dhmcdeath.hear")){
+				            player.sendMessage( final_msg );
+				            debug("Messaging Player: " + player.getName());
+		            	}
 		    		}
 	            } else {
 	            	
 	            	// Iterate all players within the world
 		            for (Player player : p.getWorld().getPlayers()) {
-		            	double dist = player.getLocation().distance( p.getLocation() );
-		            	debug("Distance for "+ player.getName()+ " is " + dist );
-		            	// Only send message if player is within distance
-		            	if( getConfig().getDouble("messages.hear_distance") == 0 || dist <= getConfig().getDouble("messages.hear_distance") ) {
-			            	player.sendMessage( final_msg );
-			            	debug("Messaging Player: " + player.getName() + " " + dist + " <= " + getConfig().getInt("messages.hear_distance"));
+		            	if(player.hasPermission("dhmcdeath.hear")){
+			            	double dist = player.getLocation().distance( p.getLocation() );
+			            	debug("Distance for "+ player.getName()+ " is " + dist );
+			            	// Only send message if player is within distance
+			            	if( getConfig().getDouble("messages.hear_distance") == 0 || dist <= getConfig().getDouble("messages.hear_distance") ) {
+				            	player.sendMessage( final_msg );
+				            	debug("Messaging Player: " + player.getName() + " " + dist + " <= " + getConfig().getInt("messages.hear_distance"));
+			            	}
 		            	}
 		    		}
 	            }
@@ -340,7 +346,7 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
             if(cause == "mob"){
             	
             	Entity killer = ((EntityDamageByEntityEvent)event.getEntity().getLastDamageCause()).getDamager();
-            	debug("Entity Was: " + killer);
+            	debug("Entity Was: " + killer.toString());
             	
             	if (killer instanceof Blaze){
             		attacker = "blaze";
