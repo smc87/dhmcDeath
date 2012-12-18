@@ -97,6 +97,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
@@ -280,8 +281,14 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	 */
 	private String getCauseOfDeath(EntityDeathEvent event, Player p){
 		
+		EntityDamageEvent e = event.getEntity().getLastDamageCause();
+		
+		if(e == null){
+			return "unknown";
+		}
+		
 		// Determine the root cause
-        String cause = event.getEntity().getLastDamageCause().getCause().toString();
+        String cause = e.getCause().toString();
         debug("Raw Cause: " + cause);
         
         // Detect additional suicide. For example, when you potion
