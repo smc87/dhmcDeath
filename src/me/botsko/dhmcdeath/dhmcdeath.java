@@ -55,6 +55,10 @@ package me.botsko.dhmcdeath;
  * - Changed log to log the death info, not the message
  * Version 0.1.8
  * - Added permission node dhmcdeath.tp for using /death
+ * Version 0.1.9
+ * - Added metrics
+ * - Added support for wither
+ * - Added support for witherskeleton
  * 
  * TODO
  * - Allow players to ignore all death messages
@@ -63,6 +67,7 @@ package me.botsko.dhmcdeath;
  * 
  */
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -89,8 +94,10 @@ import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Silverfish;
 import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.Skeleton.SkeletonType;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Spider;
+import org.bukkit.entity.Wither;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
@@ -121,6 +128,13 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	public void onEnable(){
 		
 		this.log("Initializing plugin. By Viveleroi, Darkhelmet Minecraft: s.dhmc.us");
+		
+		try {
+		    Metrics metrics = new Metrics(this);
+		    metrics.start();
+		} catch (IOException e) {
+		    log("MCStats submission failed.");
+		}
 		
 		// Load configuration, or install if new
 		config = DeathConfig.init( this );
@@ -304,6 +318,9 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
         if(cause == "ENTITY_ATTACK" && p.getKiller() instanceof Player){
         	cause = "pvp";
         }
+        if(cause == "ENTITY_ATTACK" && p.getKiller() instanceof Wither){
+        	cause = "mob";
+        }
         if(cause == "ENTITY_ATTACK" && !(p.getKiller() instanceof Player)){
         	cause = "mob";
         }
@@ -383,7 +400,12 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
             		attacker = "silverfish";
             	}
             	if (killer instanceof Skeleton){
-            		attacker = "skeleton";
+            		Skeleton skele = (Skeleton) killer;
+            		if(skele.getSkeletonType() == SkeletonType.WITHER){
+            			attacker = "witherskeleton";
+            		} else {
+            			attacker = "skeleton";
+            		}
             	}
             	if (killer instanceof Arrow){
             		attacker = "skeleton";
@@ -393,6 +415,9 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
             	}
             	if (killer instanceof Spider){
             		attacker = "spider";
+            	}
+            	if (killer instanceof Wither){
+            		attacker = "wither";
             	}
             	if (killer instanceof Wolf){
                     Wolf wolf = (Wolf)killer;
