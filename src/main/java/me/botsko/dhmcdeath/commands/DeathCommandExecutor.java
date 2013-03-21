@@ -1,6 +1,7 @@
 package me.botsko.dhmcdeath.commands;
 
 import me.botsko.dhmcdeath.DhmcDeath;
+import me.botsko.dhmcdeath.tp.Death;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -8,7 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.IllegalPluginAccessException;
 
-public class DhmcdeathCommandExecutor implements CommandExecutor {
+public class DeathCommandExecutor implements CommandExecutor {
 	
 	private DhmcDeath plugin;
 	
@@ -17,7 +18,7 @@ public class DhmcdeathCommandExecutor implements CommandExecutor {
 	 * @param plugin
 	 * @return 
 	 */
-	public DhmcdeathCommandExecutor(DhmcDeath plugin) {
+	public DeathCommandExecutor(DhmcDeath plugin) {
 		this.plugin = plugin;
 	}
 	
@@ -32,25 +33,33 @@ public class DhmcdeathCommandExecutor implements CommandExecutor {
      * @param args
      * @return
      */
-	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) throws IllegalPluginAccessException {
 		
 		// Is a player issue this command?
     	if (sender instanceof Player) {
-    		
     		Player player = (Player) sender;
-    		
-    		// Buy item|repair <quantity>
-    		if(args[0].equalsIgnoreCase("reload")){
-				if (player.hasPermission("dhmcdeath.*") || player.hasPermission("dhmcdeath.admin.*")){
-					plugin.reloadConfig();
-					player.sendMessage( plugin.playerMsg("Configuration reloaded successfully.") );
-					return true;
-				}
-			}
+    		if(player.hasPermission("dhmcdeath.tp")){
+    			returnToDeathPoint( player );
+    			return true;
+    		}
     	}
 
 		return false; 
 		
+	}
+	
+	
+	/**
+	 * 
+	 * @param player
+	 */
+	protected void returnToDeathPoint( Player player ){
+		if(plugin.getDeaths().containsKey(player.getName())){
+			Death d = plugin.getDeaths().get( player.getName() );
+			player.teleport( d.getLocation() );
+			plugin.getDeaths().remove( player.getName() );
+		} else {
+			player.sendMessage(plugin.playerError("No death location was saved."));
+		}
 	}
 }

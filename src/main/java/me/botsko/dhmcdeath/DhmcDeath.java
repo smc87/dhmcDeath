@@ -217,7 +217,7 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	            }
 	            
 	            boolean allow_tp = true;
-	            if(!getConfig().getBoolean("allow_dethpoint_tp_on_pvp")){
+	            if(!getConfig().getBoolean("allow_deathpoint_tp_on_pvp")){
 	            	if(cause.equals("pvp")){
 	            		allow_tp = false;
 	            	}

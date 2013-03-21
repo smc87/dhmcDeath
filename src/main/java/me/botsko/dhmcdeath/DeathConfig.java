@@ -24,7 +24,7 @@ public class DeathConfig {
 		config.addDefault("messages.hear_distance", 50 );
 		config.addDefault("messages.log_deaths", true );
 		
-		config.addDefault("allow_dethpoint_tp_on_pvp", false );
+		config.addDefault("allow_deathpoint_tp_on_pvp", false );
 
 		// Set initial methods as enabled
 		config.addDefault("messages.custom.enabled", true );
