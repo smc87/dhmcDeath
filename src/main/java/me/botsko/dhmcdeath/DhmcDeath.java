@@ -59,9 +59,9 @@ package me.botsko.dhmcdeath;
  * - Added metrics
  * - Added support for wither
  * - Added support for witherskeleton
- * 
- * TODO
- * - Allow players to ignore all death messages
+ * Version 0.2
+ * - Updated to use new dhmc code library, elixr
+ * - Fixed config value spelling error
  * 
  * @author Mike Botsko (viveleroi aka botskonet) http://www.botsko.net
  * 
@@ -76,38 +76,17 @@ import java.util.logging.Logger;
 import me.botsko.dhmcdeath.commands.DeathCommandExecutor;
 import me.botsko.dhmcdeath.commands.DhmcdeathCommandExecutor;
 import me.botsko.dhmcdeath.tp.Death;
+import me.botsko.elixr.DeathUtils;
 
 import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Blaze;
-import org.bukkit.entity.CaveSpider;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.EnderDragon;
-import org.bukkit.entity.Enderman;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Ghast;
-import org.bukkit.entity.MagmaCube;
-import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Silverfish;
-import org.bukkit.entity.Skeleton;
-import org.bukkit.entity.Skeleton.SkeletonType;
-import org.bukkit.entity.Slime;
-import org.bukkit.entity.Spider;
-import org.bukkit.entity.Wither;
-import org.bukkit.entity.Wolf;
-import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -168,8 +147,8 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	        Player p = (Player)event.getEntity();
 			
 	        // Determine the cause
-	        String cause = getCauseOfDeath( event, p );
-	        String attacker = getAttacker(event, p);
+	        String cause = DeathUtils.getCauseNiceName( p );
+	        String attacker = DeathUtils.getAttackerName( p );
             
             // Verify death messages are enabled for this type
             if( getConfig().getBoolean("messages."+cause.toLowerCase()+".enabled") ){
@@ -202,11 +181,11 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	            final_msg = final_msg.replaceAll("%d", p.getName());
 
 	            if(attacker == "pvpwolf"){
-	            	String owner = getTameWolfOwner(event);
+	            	String owner = DeathUtils.getTameWolfOwner(event);
 	            	attacker = owner+"'s wolf";
 	            }
 	            final_msg = final_msg.replaceAll("%a", attacker);
-	            final_msg = final_msg.replaceAll("%i", getWeapon(p) );
+	            final_msg = final_msg.replaceAll("%i", DeathUtils.getWeapon(p) );
 	            
 	            // Colorize
 	            final_msg = colorize(final_msg);
@@ -266,230 +245,6 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	 */
 	public HashMap<String,Death> getDeaths(){
 		return this.deaths;
-	}
-	
-	
-	/**
-	 * Translates the cause of death into a more consistent naming convention we
-	 * can use to relate messages.
-	 * 
-	 * All possible deaths:
-	 * custom
-	 * drowning
-	 * fall
-	 * lava
-	 * lightning
-	 * mob
-	 * poison ?
-	 * pvp
-	 * starvation
-	 * suffocation
-	 * suicide
-	 * void
-	 * 
-	 * http://jd.bukkit.org/apidocs/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html
-	 * 
-	 * @param event
-	 * @param p
-	 * @return String
-	 */
-	private String getCauseOfDeath(EntityDeathEvent event, Player p){
-		
-		EntityDamageEvent e = event.getEntity().getLastDamageCause();
-		
-		if(e == null){
-			return "unknown";
-		}
-		
-		// Determine the root cause
-        String cause = e.getCause().toString();
-        debug("Raw Cause: " + cause);
-        
-        // Detect additional suicide. For example, when you potion
-        // yourself with instant damage it doesn't show as suicide.
-        if(p.getKiller() instanceof Player){
-        	Player killer = p.getKiller();
-        	if(killer.getName() == p.getName()){
-        		cause = "suicide";
-        	}
-        }
-        
-        // translate bukkit events to nicer names
-        if(cause == "ENTITY_ATTACK" && p.getKiller() instanceof Player){
-        	cause = "pvp";
-        }
-        if(cause == "ENTITY_ATTACK" && p.getKiller() instanceof Wither){
-        	cause = "mob";
-        }
-        if(cause == "ENTITY_ATTACK" && !(p.getKiller() instanceof Player)){
-        	cause = "mob";
-        }
-        if(cause == "PROJECTILE" && !(p.getKiller() instanceof Player)){
-        	cause = "mob"; // skeleton
-        }
-        if(cause == "PROJECTILE" && (p.getKiller() instanceof Player)){
-        	cause = "pvp"; // bow and arrow
-        }
-        if(cause == "ENTITY_EXPLOSION"){
-        	cause = "mob"; // creeper
-        }
-        if(cause == "CONTACT"){
-        	cause = "cactus";
-        }
-        if(cause == "BLOCK_EXPLOSION"){
-        	cause = "tnt";
-        }
-        if(cause == "FIRE" || cause == "FIRE_TICK"){
-        	cause = "fire";
-        }
-        if(cause == "MAGIC"){
-        	cause = "potion";
-        }
-        
-        debug("Parsed Cause: " + cause);
-        
-        return cause;
-		
-	}
-	
-	
-	/**
-	 * Returns the name of the attacker, whether mob or player.
-	 * 
-	 * @param event
-	 * @param p
-	 * @return
-	 */
-	private String getAttacker(EntityDeathEvent event, Player p){
-		
-		String attacker = "";
-		String cause = getCauseOfDeath(event, p);
-        if(p.getKiller() instanceof Player){
-        	attacker = p.getKiller().getName();
-        } else {
-            if(cause == "mob"){
-            	
-            	Entity killer = ((EntityDamageByEntityEvent)event.getEntity().getLastDamageCause()).getDamager();
-            	debug("Entity Was: " + killer.toString());
-            	
-            	if (killer instanceof Blaze){
-            		attacker = "blaze";
-            	}
-            	if (killer instanceof CaveSpider){
-            		attacker = "cave spider";
-            	}
-            	if (killer instanceof Creeper){
-            		attacker = "creeper";
-            	}
-            	if (killer instanceof EnderDragon){
-            		attacker = "ender dragon";
-            	}
-            	if (killer instanceof Enderman){
-            		attacker = "enderman";
-            	}
-            	if (killer instanceof Ghast){
-            		attacker = "ghast";
-            	}
-            	if (killer instanceof MagmaCube){
-            		attacker = "magma cube";
-            	}
-            	if (killer instanceof PigZombie){
-            		attacker = "pig zombie";
-            	}
-            	if (killer instanceof Silverfish){
-            		attacker = "silverfish";
-            	}
-            	if (killer instanceof Skeleton){
-            		Skeleton skele = (Skeleton) killer;
-            		if(skele.getSkeletonType() == SkeletonType.WITHER){
-            			attacker = "witherskeleton";
-            		} else {
-            			attacker = "skeleton";
-            		}
-            	}
-            	if (killer instanceof Arrow){
-            		attacker = "skeleton";
-            	}
-            	if (killer instanceof Slime){
-            		attacker = "slime";
-            	}
-            	if (killer instanceof Spider){
-            		attacker = "spider";
-            	}
-            	if (killer instanceof Wither){
-            		attacker = "wither";
-            	}
-            	if (killer instanceof Wolf){
-                    Wolf wolf = (Wolf)killer;
-                    if(wolf.isTamed()){
-                        if(wolf.getOwner() instanceof Player || wolf.getOwner() instanceof OfflinePlayer ){
-                            attacker = "pvpwolf";
-                        } else {
-                        	attacker = "wolf";
-                        }
-                    } else {
-                    	attacker = "wolf";
-                    }
-            		
-            	}
-            	if (killer instanceof Zombie){
-            		attacker = "zombie";
-            	}
-            }
-        }
-        debug("Attacker: " + attacker);
-        
-        return attacker;
-        
-	}
-	
-	
-	/**
-	 * Determines the owner of a tamed wolf.
-	 * 
-	 * @param event
-	 * @return
-	 */
-	private String getTameWolfOwner(EntityDeathEvent event){
-		String owner = "";
-		Entity killer = ((EntityDamageByEntityEvent)event.getEntity().getLastDamageCause()).getDamager();
-		if (killer instanceof Wolf){
-            Wolf wolf = (Wolf)killer;
-            if(wolf.isTamed()){
-                if(wolf.getOwner() instanceof Player){
-                    owner = ((Player)wolf.getOwner()).getName();
-                }
-                if(wolf.getOwner() instanceof OfflinePlayer){
-                    owner = ((OfflinePlayer)wolf.getOwner()).getName();
-                }
-            }
-    	}
-		debug("Wolf Owner: " + owner);
-		return owner;
-	}
-	
-	
-	/**
-	 * Determines the weapon used.
-	 * 
-	 * @param p
-	 * @return
-	 */
-	private String getWeapon(Player p){
-
-        String death_weapon = "";
-        if(p.getKiller() instanceof Player){
-        	ItemStack weapon = p.getKiller().getItemInHand();
-        	death_weapon = weapon.getType().toString().toLowerCase();
-        	death_weapon = death_weapon.replaceAll("_", " ");
-        	if(death_weapon.equalsIgnoreCase("air")){
-        		death_weapon = " hands";
-        	}
-        }
-        debug("Weapon: " + death_weapon );
-        
-        return death_weapon;
-        
 	}
 	
 	
