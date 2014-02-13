@@ -137,7 +137,7 @@ public class DeathConfig {
 		pvp.add("&3%d &cwas just murdered by &3%a&c, using &3%i&c.");
 		pvp.add("&3%d &cdied, by &3%a's %i.");
 		pvp.add("&3%a &ckilled &3%d &cwielding &3%i");
-		pvp.add("&cYou think it was &3%a who &ckilled &3%d&c? Nope, Chuck Testa.");
+		pvp.add("&cYou think it was &3%a &cwho killed &3%d&c? Nope, Chuck Testa.");
 		pvp.add("&cIt was a bitter end for &3%d&c, but &3%a &cwon victoriously.");
 		pvp.add("&cEmbarrassingly, &3%d &cdied of fright before &3%a &ccould even raise his weapon.");
 		pvp.add("&3%a &cstruck the mighty blow and ended &3%d&c.");
