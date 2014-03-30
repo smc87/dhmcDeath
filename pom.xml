@@ -4,6 +4,21 @@
   <artifactId>dhmcdeath</artifactId>
   <version>nightly-SNAPSHOT</version>
   <name>dhmcDeath</name>
+  	<repositories>
+		<repository>
+			<id>repobo-snap</id>
+			<url>http://repo.bukkit.org/content/groups/public</url>
+		</repository>
+		<repository>
+			<id>dhmc-repo</id>
+			<url>http://dhmc.us:8081/nexus/content/repositories/snapshots</url>
+		</repository>
+		    <repository>
+        <id>project.local</id>
+        <name>sean</name>
+        <url>file:${project.basedir}/repo</url>
+    </repository>
+	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>org.bukkit</groupId>
@@ -13,25 +28,15 @@
 		<dependency>
 			<groupId>me.botsko</groupId>
 			<artifactId>elixr</artifactId>
-			<version>1.0-dev-48-g1498c33-SNAPSHOT</version>
-		</dependency>
+			<version>1.0</version>
+	</dependency>
 	</dependencies>
-	<repositories>
-		<repository>
-			<id>repobo-snap</id>
-			<url>http://repo.bukkit.org/content/groups/public</url>
-		</repository>
-		<repository>
-			<id>dhmc-repo</id>
-			<url>http://dhmc.us:8081/nexus/content/repositories</url>
-		</repository>
-	</repositories>
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.0</version>
+				<version>2.1</version>
 				<configuration>
 				  <artifactSet>
                     <includes>

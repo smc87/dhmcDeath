@@ -78,6 +78,7 @@ import me.botsko.dhmcdeath.commands.DhmcdeathCommandExecutor;
 import me.botsko.dhmcdeath.tp.Death;
 import me.botsko.elixr.DeathUtils;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -208,12 +209,7 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	            
 	            // Send the final message
 	            if( getConfig().getBoolean("messages.allow_cross_world") ){
-		            for (Player player : getServer().getOnlinePlayers()) {
-		            	if(player.hasPermission("dhmcdeath.hear")){
-				            player.sendMessage( final_msg );
-				            debug("Messaging Player: " + player.getName());
-		            	}
-		    		}
+		           Bukkit.broadcastMessage(final_msg);
 	            } else {
 	            	
 	            	// Iterate all players within the world
