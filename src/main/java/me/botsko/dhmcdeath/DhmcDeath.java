@@ -135,21 +135,16 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	@SuppressWarnings("unchecked")
 	@EventHandler(priority = EventPriority.NORMAL)
     public void onEntityDeath(final EntityDeathEvent event) {
-		
+		PlayerDeathEvent e;	
 		if (event.getEntity() instanceof Player){
-			
-			// Disable Bukkit death messages
-	        if (event instanceof PlayerDeathEvent) {
-	            PlayerDeathEvent e = (PlayerDeathEvent) event;
-	            e.setDeathMessage(null);
-	        }
-  
+
 	        // Find player who died
 	        Player p = (Player)event.getEntity();
 			
 	        // Determine the cause
 	        String cause = DeathUtils.getCauseNiceName( p );
 	        String attacker = DeathUtils.getAttackerName( p );
+	        String weapon_used = DeathUtils.getWeapon( p );
             
             // Verify death messages are enabled for this type
             if( getConfig().getBoolean("messages."+cause.toLowerCase()+".enabled") ){
@@ -186,7 +181,7 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	            	attacker = owner+"'s wolf";
 	            }
 	            final_msg = final_msg.replaceAll("%a", attacker);
-	            final_msg = final_msg.replaceAll("%i", DeathUtils.getWeapon(p) );
+	            final_msg = final_msg.replaceAll("%i", weapon_used );
 	            
 	            // Colorize
 	            final_msg = colorize(final_msg);
@@ -209,7 +204,13 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	            
 	            // Send the final message
 	            if( getConfig().getBoolean("messages.allow_cross_world") ){
-		           Bukkit.broadcastMessage(final_msg);
+	            //Replace default death message	
+	    	        if (event instanceof PlayerDeathEvent) {
+	    	            e = (PlayerDeathEvent) event;
+	    	            e.setDeathMessage(final_msg); 	
+	    	        } else {
+	            	Bukkit.broadcastMessage("Is this for when a mob dies?");
+	            	}
 	            } else {
 	            	
 	            	// Iterate all players within the world
