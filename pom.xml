@@ -11,7 +11,7 @@
 		</repository>
 		<repository>
 			<id>dhmc-repo</id>
-			<url>http://dhmc.us:8081/nexus/content/repositories/snapshots</url>
+			<url>http://dhmc.us:8081/nexus/content/repositories/</url>
 		</repository>
 		    <repository>
         <id>project.local</id>

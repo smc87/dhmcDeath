@@ -135,7 +135,14 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	@SuppressWarnings("unchecked")
 	@EventHandler(priority = EventPriority.NORMAL)
     public void onEntityDeath(final EntityDeathEvent event) {
+		
 		if (event.getEntity() instanceof Player){
+			
+			// Disable Bukkit death messages
+	        if (event instanceof PlayerDeathEvent) {
+	            PlayerDeathEvent e = (PlayerDeathEvent) event;
+	            e.setDeathMessage(null);
+	        }
 
 	        // Find player who died
 	        Player p = (Player)event.getEntity();
@@ -144,8 +151,20 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	        String cause = DeathUtils.getCauseNiceName( p );
 	        String attacker = DeathUtils.getAttackerName( p );
 	        String weapon_used = DeathUtils.getWeapon( p );
-            
+	        //String mobtype = event.getEntity().getKiller().getName();
+	        
+	        //Get Cause if a random mob
+	        //Elixr seems broken, trying to reproduce :(
+            //debug("mobtype: " + mobtype);
+            debug("cause: " + cause);
+            debug("attacker: " + attacker);
+            debug("weapon used: " + weapon_used);
             // Verify death messages are enabled for this type
+           // if( getConfig().getBoolean("messages."+cause.toLowerCase()+".enabled") || getConfig().getBoolean("messages..enabled") ){
+
+            if (cause == "skeleton" || cause == "creeper"){
+            	cause = "mob";
+            }
             if( getConfig().getBoolean("messages."+cause.toLowerCase()+".enabled") ){
             
 	            // Load the death message for this type
@@ -208,7 +227,7 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	    	        	PlayerDeathEvent e = (PlayerDeathEvent) event;
 	    	            e.setDeathMessage(final_msg); 	
 	    	        } else {
-	            	//unsure what happens here? its not mobdeath?
+	            	//arnt they all?
 	            	}
 	            } else {
 	            	
@@ -228,7 +247,7 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	            if(getConfig().getBoolean("messages.log_deaths")){
 	            	this.log(death.getPlayer().getName() + " died from " + death.getCause() + " (killer: "+death.getAttacker()+") in " + death.getWorld().getName() + " at x:" + death.getLocation().getX() + " y:" + death.getLocation().getY() + " z:" + death.getLocation().getZ() );
 	            }
-            } else {
+            
             	debug("Messages are disabled for this cause: " + cause);
             }
 		}
