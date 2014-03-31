@@ -135,7 +135,6 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	@SuppressWarnings("unchecked")
 	@EventHandler(priority = EventPriority.NORMAL)
     public void onEntityDeath(final EntityDeathEvent event) {
-		PlayerDeathEvent e;	
 		if (event.getEntity() instanceof Player){
 
 	        // Find player who died
@@ -206,10 +205,10 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	            if( getConfig().getBoolean("messages.allow_cross_world") ){
 	            //Replace default death message	
 	    	        if (event instanceof PlayerDeathEvent) {
-	    	            e = (PlayerDeathEvent) event;
+	    	        	PlayerDeathEvent e = (PlayerDeathEvent) event;
 	    	            e.setDeathMessage(final_msg); 	
 	    	        } else {
-	            	Bukkit.broadcastMessage("Is this for when a mob dies?");
+	            	//unsure what happens here? its not mobdeath?
 	            	}
 	            } else {
 	            	
