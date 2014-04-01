@@ -78,7 +78,6 @@ import me.botsko.dhmcdeath.commands.DhmcdeathCommandExecutor;
 import me.botsko.dhmcdeath.tp.Death;
 import me.botsko.elixr.DeathUtils;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -86,6 +85,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -225,8 +225,8 @@ public class DhmcDeath extends JavaPlugin implements Listener  {
 	            //Replace default death message	
 	    	        if (event instanceof PlayerDeathEvent) {
 	    	        	PlayerDeathEvent e = (PlayerDeathEvent) event;
-	    	            e.setDeathMessage(final_msg); 	
-	    	        } else {
+	    	            e.setDeathMessage(final_msg); 
+	    	            } else {
 	            	//arnt they all?
 	            	}
 	            } else {
